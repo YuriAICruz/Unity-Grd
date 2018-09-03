@@ -59,24 +59,49 @@ namespace Graphene.Grid
         {
             GenerateSingleton();
 
+            _mainCam = Camera.main;
+            
+            if(GridRootPosition == null) return;
+            
+            GenerateGrid();
+        }
+        
+        public void GenerateGrid()
+        {
             GenerateArrows();
 
             GenerateDrawer();
-
-            _mainCam = Camera.main;
-
-            _grid = new GridQuad3D((int) _gridCellSize.x, (int) _gridCellSize.y, _squareWidith).SetRoot(GridRootPosition).SetBaseColor(BaseColor).Generate(GridRootPosition.position).DrawGrid(BaseColor);
+            
+            _grid = new GridQuad3D((int) _gridCellSize.x, (int) _gridCellSize.y, _squareWidith)
+                .SetRoot(GridRootPosition)
+                .SetBaseColor(BaseColor)
+                .Generate(GridRootPosition.position)
+                .DrawGrid(BaseColor);
         }
 
         private void GenerateDrawer()
         {
-            _pathDrawer = Instantiate(Resources.Load<GameObject>("UI/PathRenderer"), transform).GetComponent<LineRenderer>();
+            var renderer = Resources.Load<GameObject>("Grid/PathRenderer");
+            if (renderer == null)
+            {
+                Debug.LogError("No Resource at Grid/PathRenderer");
+                return;
+            }
+            _pathDrawer = Instantiate(renderer, transform).GetComponent<LineRenderer>();
         }
 
         private void GenerateArrows()
         {
+            var arr = Resources.Load<GameObject>("Grid/Arrow");
+
+            if (arr == null)
+            {
+                Debug.LogError("No Resource at Grid/Arrow");
+                return;
+            }
+            
             _arrows = new GameObject[4];
-            var arr = Resources.Load<GameObject>("UI/Arrow");
+            
             for (int i = 0; i < _arrows.Length; i++)
             {
                 _arrows[i] = Instantiate(arr, transform);
