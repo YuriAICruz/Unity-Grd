@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Grid.Presentation;
+using Graphene.Grid.Presentation;
 using Priority_Queue;
 using UnityEngine;
 using VZ.Grid;
 
-namespace Grid
+namespace Graphene.Grid
 {
     public class GridQuad3D : GridQuad
     {

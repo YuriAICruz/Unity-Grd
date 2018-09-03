@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VZ.Grid.FogOfWar;
 
-namespace Grid.FogOfWar {
+namespace Graphene.Grid.FogOfWar {
     [RequireComponent(typeof(MeshFilter))]
     public class FogOfWarManager: MonoBehaviour {
         private MeshFilter _meshFilter;

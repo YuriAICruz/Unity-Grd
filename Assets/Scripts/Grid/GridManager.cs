@@ -1,14 +1,9 @@
 using System.Collections.Generic;
-using Actors;
-using Actors.TurnActor;
-using Grid.Commands;
-using TurnBased;
-using TurnBased.Command;
 using UnityEngine;
 
-namespace Grid
+namespace Graphene.Grid
 {
-    public class GridManager : MonoBehaviour, ITasker
+    public class GridManager : MonoBehaviour
     {
         public Transform GridRootPosition;
         private static GridManager _instance;
@@ -22,7 +17,7 @@ namespace Grid
         [SerializeField] private Vector2 _gridCellSize = new Vector2(10, 10);
         [SerializeField] private float _squareWidith = 1;
         public Color BaseColor = Color.white;
-        private TurnManagerBase _manager;
+        // private TurnManagerBase _manager;
 
         public static GridManager GetInstance()
         {
@@ -44,21 +39,21 @@ namespace Grid
             DontDestroyOnLoad(gameObject);
         }
 
-        private Queue<ICommand> _history = new Queue<ICommand>();
-
-        public ExecutionResult ScheduleCommand(ICommand command)
-        {
-            StartCoroutine(command.Execute());
-            _history.Enqueue(command);
-            Timeline.SaveToTimeline(command);
-
-            return ExecutionResult.Success;
-        }
-
-        public ExecutionResult UndoLastCommand()
-        {
-            throw new System.NotImplementedException();
-        }
+//        private Queue<ICommand> _history = new Queue<ICommand>();
+//
+//        public ExecutionResult ScheduleCommand(ICommand command)
+//        {
+//            StartCoroutine(command.Execute());
+//            _history.Enqueue(command);
+//            Timeline.SaveToTimeline(command);
+//
+//            return ExecutionResult.Success;
+//        }
+//
+//        public ExecutionResult UndoLastCommand()
+//        {
+//            throw new System.NotImplementedException();
+//        }
 
         private void Awake()
         {
@@ -114,17 +109,12 @@ namespace Grid
 
         private void Start()
         {
-            _manager = TurnManagerBase.GetInstance();
-
-            if (_manager != null)
-                _manager.InitFirstTurn();
-
-            _manager.OnChangeState += StateChanged;
-        }
-
-        private void StateChanged(TurnState state)
-        {
-            Clear();
+//            _manager = TurnManagerBase.GetInstance();
+//
+//            if (_manager != null)
+//                _manager.InitFirstTurn();
+//
+//            _manager.OnChangeState += StateChanged;
         }
 
         public float GetSquareWidith()
@@ -162,7 +152,9 @@ namespace Grid
         {
             ClearPath();
             HideArrows();
-            ScheduleCommand(new ResetGrid(_grid));
+
+            _grid.ResetGrid();
+            // ScheduleCommand(new ResetGrid(_grid));
         }
         public void ClearPath()
         {
@@ -171,10 +163,15 @@ namespace Grid
 
         public void DrawGrid(List<IGridInfo> grs, Color color, bool reset = true)
         {
-            if (reset)
-                ScheduleCommand(new ResetGrid(_grid));
+//            if (reset)
+//                ScheduleCommand(new ResetGrid(_grid));
+//
+//            ScheduleCommand(new DrawOnGrid(_grid, grs, color, BaseColor));
 
-            ScheduleCommand(new DrawOnGrid(_grid, grs, color, BaseColor));
+            if (reset)
+                Clear();
+            
+            _grid.DrawGrid(grs, color);
         }
 
         public IGridInfo GetMousePos(Vector2 ScreenMouse)

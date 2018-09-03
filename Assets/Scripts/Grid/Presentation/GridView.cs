@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Grid.Presentation
+namespace Graphene.Grid.Presentation
 {
     public class GridView : MonoBehaviour
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Grid {
+namespace Graphene.Grid {
     public interface IGrid {
         IGrid Generate(Vector3 basePos);
         

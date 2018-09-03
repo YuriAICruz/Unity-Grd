@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Linq;
-using Actors;
-using TurnBased;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using VZ.Grid;
 
-namespace Grid
+namespace Graphene.Grid
 {
     [RequireComponent(typeof(Camera))]
     public class CameraClickListener : MonoBehaviour
     {
         private GridManager _grid;
-        private TurnManagerBase _turnManager;
+        
         private Camera _cam;
+
         private EventSystem _eventSys;
         private Vector3 _lastPos;
         [SerializeField] private float _speed;
@@ -21,19 +18,19 @@ namespace Grid
         private IGridInfo _lastGridPos;
 
         public event Action<Vector3, Vector3> MousePan;
+        public event Action<IGridInfo, bool> GridPop;
 
         private void Start()
         {
             _eventSys = GameObject.FindObjectOfType<EventSystem>();
             _grid = GridManager.GetInstance();
             _cam = GetComponent<Camera>();
-            _turnManager = TurnManagerBase.GetInstance();
         }
 
         private void Update()
         {
-            if(GridInput.BlockInput) return;
-            
+            if (GridInput.BlockInput) return;
+
             if (Input.GetMouseButtonDown(0))
             {
                 _timer = Time.time;
@@ -49,7 +46,7 @@ namespace Grid
                 GetMousePos();
                 GetPos();
             }
-            else if(!Input.GetMouseButton(0))
+            else if (!Input.GetMouseButton(0))
             {
                 GetMousePos();
                 GetPos(true);
@@ -91,7 +88,9 @@ namespace Grid
 
             if (_lastGridPos != null)
             {
-                _turnManager.GridSetInput(_lastGridPos, over);
+                if (GridPop != null) GridPop(_lastGridPos, over);
+                Debug.LogError("Turn Manager, needs to receive this response");
+                // _turnManager.GridSetInput(_lastGridPos, over);
             }
         }
 

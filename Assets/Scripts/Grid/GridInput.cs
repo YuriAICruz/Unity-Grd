@@ -1,4 +1,4 @@
-﻿namespace Grid
+﻿namespace Graphene.Grid
 {
     public static class GridInput
     {
