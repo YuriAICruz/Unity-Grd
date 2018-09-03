@@ -1,0 +1,8 @@
+{
+    "name": "graphene.grid",
+    "displayName": "Grid",
+    "version": "0.8.0",
+    "unity": "2018.2",
+    "description": ". . .",
+    "dependencies": { }
+}
