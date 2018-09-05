@@ -131,7 +131,6 @@ namespace Graphene.Grid
             _arrows[0].SetActive(true);
         }
 
-
         private void Start()
         {
 //            _manager = TurnManagerBase.GetInstance();
@@ -181,6 +180,7 @@ namespace Graphene.Grid
             _grid.ResetGrid();
             // ScheduleCommand(new ResetGrid(_grid));
         }
+        
         public void ClearPath()
         {
             _pathDrawer.positionCount = 0;
