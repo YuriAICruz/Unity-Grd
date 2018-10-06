@@ -10,7 +10,6 @@ namespace Graphene.Grid
     public class GridQuad : Grid
     {
         protected int _x, _y;
-        protected List<IGridInfo> _grid;
 
         protected Transform _root;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Graphene.Grid;
 using UnityEditor;
 using UnityEngine;
@@ -136,7 +137,16 @@ namespace Packages.Grid.Graphene.Grid
             var color = Handles.color;
 
             Handles.color = Color.green;
-            foreach (var cell in _self.Grid.GetGrid())
+            var gr = _self.Grid.GetGrid();
+
+            if (gr == null)
+            {
+                Debug.Log(gr);
+                ClearGrid();
+                return;
+            }
+            
+            foreach (var cell in gr)
             {
                 var side = _self.Widith / 2;
                 var sqr = new Vector3[]

@@ -22,5 +22,10 @@ namespace Packages.Grid.Graphene.Grid
         public GridType GridType;
         
         public IGrid Grid;
+
+        public void GenHexGrid()
+        {
+            Grid = new HexGrid(Size.x,Size.y, Widith).Generate(Offset);
+        }
     }
 }

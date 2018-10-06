@@ -13,6 +13,7 @@ namespace Graphene.Grid
         {
             _x = x;
             _y = y;
+            _size = new Vector2Int(x, y);
             Size = size;
         }
 
