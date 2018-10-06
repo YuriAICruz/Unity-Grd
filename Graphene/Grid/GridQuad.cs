@@ -7,58 +7,43 @@ using VZ.Grid;
 
 namespace Graphene.Grid
 {
-    public class GridQuad : IGrid
+    public class GridQuad : Grid
     {
         protected int _x, _y;
-        protected float _size;
         protected List<IGridInfo> _grid;
 
-        protected Vector2[] _dirs = new Vector2[]
-        {
-            new Vector2(0, 1),
-            new Vector2(0, -1),
-            new Vector2(1, 0),
-            new Vector2(-1, 0)
-        };
-
         protected Transform _root;
-        protected Color _baseColor;
 
         public GridQuad(int x, int y, float size)
         {
             _x = x;
             _y = y;
-            _size = size;
+            _size = new Vector2Int(x, y);
+            Size = size;
         }
 
         public GridQuad()
         {
         }
 
-        public IGrid SetRoot(Transform root)
+        public override IGrid SetRoot(Transform root)
         {
             _root = root;
 
             return this;
         }
-        
-        public IGrid SetBaseColor(Color color)
-        {
-            _baseColor = color;
-            return this;
-        }
 
-        public virtual IGrid Generate(Vector3 basePos)
+        public override IGrid Generate(Vector3 basePos)
         {
             _grid = new List<IGridInfo>();
 
-            var offset = basePos + new Vector3(_size / 2, _size / 2, 0);
+            var offset = basePos + new Vector3(Size / 2, Size / 2, 0);
 
             for (int x = 0, n = _x; x < n; x++)
             {
                 for (int y = 0, m = _y; y < m; y++)
                 {
-                    var pos = offset + new Vector3(x, y, 0) * _size;
+                    var pos = offset + new Vector3(x, y, 0) * Size;
                     _grid.Add(new WorldGridInfo(x, y, pos, _root, _baseColor));
                 }
             }
@@ -66,73 +51,13 @@ namespace Graphene.Grid
             return this;
         }
 
-        public IGrid ResetGrid()
+        public override IGridInfo GetPos(Vector3 pos)
         {
-            if (_grid == null)
-            {
-                return this;
-            }
-
-            for (int i = 0, n = _grid.Count; i < n; i++)
-            {
-                _grid[i].Reset();
-            }
-            return this;
-        }
-
-        public IGrid DrawGrid(Color color)
-        {
-            if (_grid == null)
-            {
-                return this;
-            }
-
-            for (int i = 0, n = _grid.Count; i < n; i++)
-            {
-                _grid[i].Draw(color, _size);
-            }
-            return this;
-        }
-
-        public void DrawGrid(List<IGridInfo> grids, Color color)
-        {
-            if (grids == null)
-            {
-                return;
-            }
-
-            for (int i = 0, n = grids.Count; i < n; i++)
-            {
-                grids[i].Draw(color, _size);
-            }
-            return;
-        }
-
-        public void DrawGrid(IGridInfo gr, Color color)
-        {
-            gr.Draw(color, _size);
-        }
-
-        public List<IGridInfo> GetGrid()
-        {
-            return _grid;
-        }
-
-        public IGridInfo GetPos(int x, int y)
-        {
-            if (x >= _x || y >= _y || x < 0 || y < 0)
-                return null;
-
-            return _grid.Find(g => g.x == x && g.y == y);
-        }
-
-        public virtual IGridInfo GetPos(Vector3 pos)
-        {
-            var dist = _size/2;
+            var dist = Size / 2;
             return _grid.Find(g => Math.Abs(g.worldPos.x - pos.x) < dist && Math.Abs(g.worldPos.y - pos.y) < dist);
         }
 
-        public virtual IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
+        public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
         {
             var dist = (mainCam.WorldToScreenPoint(_grid[0].worldPos) - mainCam.WorldToScreenPoint(_grid[1].worldPos)).magnitude * 0.5f;
 
@@ -142,7 +67,7 @@ namespace Graphene.Grid
             return gr;
         }
 
-        public List<IGridInfo> SelectRegion(IGridInfo gr, int size, bool removeCenter)
+        public override List<IGridInfo> SelectRegion(IGridInfo gr, int size, bool removeCenter)
         {
             var lst = new List<IGridInfo>() {gr};
 
@@ -168,12 +93,12 @@ namespace Graphene.Grid
             return lst;
         }
 
-        public virtual List<IGridInfo> GetPath(IGridInfo from, IGridInfo to)
+        public override List<IGridInfo> GetPath(IGridInfo from, IGridInfo to)
         {
             var origin = from as GridInfo;
             var destination = to as GridInfo;
             var frontier = new FastPriorityQueue<GridInfo>(_grid.Count);
-            
+
             frontier.Enqueue(origin, 0);
 
             var weight_so_far = new Dictionary<GridInfo, int>();
@@ -267,12 +192,6 @@ namespace Graphene.Grid
 
             return lst;
         }
-
-        protected int Heuristic(IGridInfo a, IGridInfo b)
-        {
-            // Manhattan distance on a square grid
-            return Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y);
-        }
     }
 
     public class GridInfo : FastPriorityQueueNode, IGridInfo
@@ -282,6 +201,7 @@ namespace Graphene.Grid
         public int y { get; set; }
         public bool isBlocked { get; set; }
         public int weight { get; set; }
+        public float size { get; set; }
 
         public GridInfo()
         {
@@ -299,12 +219,26 @@ namespace Graphene.Grid
         {
         }
 
+        public void Draw(Color color)
+        {
+            Debug.DrawRay(worldPos, Vector3.up * size / 4, color, 5);
+            Debug.DrawRay(worldPos, Vector3.down * size / 4, color, 5);
+            Debug.DrawRay(worldPos, Vector3.left * size / 4, color, 5);
+            Debug.DrawRay(worldPos, Vector3.right * size / 4, color, 5);
+        }
+
+        [Obsolete]
         public void Draw(Color color, float size)
         {
             Debug.DrawRay(worldPos, Vector3.up * size / 4, color, 5);
             Debug.DrawRay(worldPos, Vector3.down * size / 4, color, 5);
             Debug.DrawRay(worldPos, Vector3.left * size / 4, color, 5);
             Debug.DrawRay(worldPos, Vector3.right * size / 4, color, 5);
+        }
+
+        public Vector3[] GetEdges()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -315,6 +249,7 @@ namespace Graphene.Grid
         public int y { get; set; }
         public bool isBlocked { get; set; }
         public int weight { get; set; }
+        public float size { get; set; }
 
         protected GridView _worldObject;
 
@@ -346,9 +281,20 @@ namespace Graphene.Grid
             _worldObject.Reset();
         }
 
+        public void Draw(Color color)
+        {
+            _worldObject.Draw(color);
+        }
+
+        [Obsolete]
         public void Draw(Color color, float size)
         {
             _worldObject.Draw(color);
+        }
+
+        public Vector3[] GetEdges()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -358,17 +304,5 @@ namespace Graphene.Grid
         {
             return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
         }
-    }
-
-    public interface IGridInfo
-    {
-        Vector3 worldPos { get; set; }
-        int x { get; set; }
-        int y { get; set; }
-        bool isBlocked { get; set; }
-        int weight { get; set; }
-
-        void Reset();
-        void Draw(Color color, float size);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,10 @@ namespace Graphene.Grid {
         IGrid ResetGrid();
 
         IGrid DrawGrid(Color color);
+        
+        [Obsolete]
         IGrid SetRoot(Transform root);
+        
         IGrid SetBaseColor(Color color);
 
         List<IGridInfo> GetGrid();

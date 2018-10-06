@@ -1,0 +1,12 @@
+{
+    "name": "Graphene.GridEditor",
+    "references": [
+        "Graphene.Grid"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

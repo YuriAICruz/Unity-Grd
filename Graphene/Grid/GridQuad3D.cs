@@ -13,7 +13,7 @@ namespace Graphene.Grid
         {
             _x = x;
             _y = y;
-            _size = size;
+            Size = size;
         }
 
         public GridQuad3D()
@@ -27,7 +27,7 @@ namespace Graphene.Grid
             var lyr = new LayerMask();
             lyr = ~ LayerMask.NameToLayer("IgnoreGrid") & LayerMask.NameToLayer("Grid");
 
-            var offset = new Vector3(_size / 2, _size / 2, 0);
+            var offset = new Vector3(Size / 2, Size / 2, 0);
 
             var rayDirs = new Vector3[]
             {
@@ -41,17 +41,17 @@ namespace Graphene.Grid
             {
                 for (int y = 0, m = _y; y < m; y++)
                 {
-                    var pos = _root.TransformPoint(offset + new Vector3(x, y, 0) * _size);
+                    var pos = _root.TransformPoint(offset + new Vector3(x, y, 0) * Size);
                     var block = false;
 
                     for (int i = 0; i < rayDirs.Length; i++)
                     {
-                        var ray = new Ray(_root.TransformDirection(rayDirs[i] * _size) + pos + Vector3.up * 100, Vector3.down);
+                        var ray = new Ray(_root.TransformDirection(rayDirs[i] * Size) + pos + Vector3.up * 100, Vector3.down);
                         block = Physics.Raycast(ray, 200, lyr);
 
                         if (block) break;
                     }
-                    _grid.Add(new WorldGrid3DInfo(x, y, pos, _root, _baseColor, block));
+                    _grid.Add(new WorldGrid3DInfo(x, y, pos, _root, _baseColor, block, false)); // TODO: all wrong :(
                 }
             }
 
@@ -60,7 +60,7 @@ namespace Graphene.Grid
 
         public override IGridInfo GetPos(Vector3 pos)
         {
-            var dist = _size / 2;
+            var dist = Size / 2;
             return _grid.Find(g => Vector3.Distance(g.worldPos, pos) < dist);
         }
 
@@ -76,7 +76,7 @@ namespace Graphene.Grid
 
                 return GetPos(pos);
             }
-            
+
             return null;
         }
 
@@ -105,13 +105,13 @@ namespace Graphene.Grid
 
             return lst;
         }
-        
+
         public override List<IGridInfo> GetPath(IGridInfo from, IGridInfo to)
         {
             var origin = from as WorldGrid3DInfo;
             var destination = to as WorldGrid3DInfo;
             var frontier = new FastPriorityQueue<WorldGrid3DInfo>(_grid.Count);
-            
+
             frontier.Enqueue(origin, 0);
 
             var weight_so_far = new Dictionary<WorldGrid3DInfo, int>();
@@ -187,12 +187,15 @@ namespace Graphene.Grid
         {
         }
 
-        public WorldGrid3DInfo(int x, int y, Vector3 pos, Transform root, Color color, bool blocked)
+        public WorldGrid3DInfo(int x, int y, Vector3 pos, Transform root, Color color, bool blocked, bool createObject = true)
         {
             this.x = x;
             this.y = y;
             worldPos = pos;
             isBlocked = blocked;
+
+            if (!createObject) return;
+
             var tmp = new GameObject("(" + x.ToString("00") + " ," + y.ToString("00") + ")", new Type[]
             {
                 typeof(GridView)
