@@ -63,10 +63,10 @@ namespace Graphene.Grid
             
             if(GridRootPosition == null) return;
             
-            GenerateGrid();
+            GenerateGrid(GridDirection.XY);
         }
         
-        public void GenerateGrid()
+        public void GenerateGrid(GridDirection direction)
         {
             GenerateArrows();
 
@@ -75,7 +75,7 @@ namespace Graphene.Grid
             _grid = new GridQuad3D((int) _gridCellSize.x, (int) _gridCellSize.y, _squareWidith)
                 .SetRoot(GridRootPosition)
                 .SetBaseColor(BaseColor)
-                .Generate(GridRootPosition.position)
+                .Generate(GridRootPosition.position, direction)
                 .DrawGrid(BaseColor);
         }
 

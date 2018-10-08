@@ -26,7 +26,7 @@ namespace Graphene.Grid
             throw new System.NotImplementedException();
         }
         
-        public virtual IGrid Generate(Vector3 basePos)
+        public virtual IGrid Generate(Vector3 basePos, GridDirection direction)
         {
             throw new System.NotImplementedException();
         }
@@ -34,6 +34,11 @@ namespace Graphene.Grid
         public virtual IGridInfo GetPos(Vector3 pos)
         {
             throw new System.NotImplementedException();
+        }
+
+        public virtual IGridInfo GetPos(Ray ray)
+        {
+            throw new NotImplementedException();
         }
 
         public virtual IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
@@ -91,7 +96,7 @@ namespace Graphene.Grid
             return _grid;
         }
 
-        public IGridInfo GetPos(int x, int y)
+        public virtual IGridInfo GetPos(int x, int y)
         {
             if (x >= _size.x || y >= _size.y || x < 0 || y < 0)
                 return null;

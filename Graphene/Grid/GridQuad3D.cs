@@ -21,7 +21,7 @@ namespace Graphene.Grid
         {
         }
 
-        public override IGrid Generate(Vector3 basePos)
+        public override IGrid Generate(Vector3 basePos, GridDirection direction)
         {
             _grid = new List<IGridInfo>();
 

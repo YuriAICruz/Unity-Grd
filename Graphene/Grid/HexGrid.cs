@@ -16,28 +16,28 @@ namespace Graphene.Grid
         {
             Size = radius;
             _size = new Vector2Int(sizeX, sizeY);
-            
+
             _dirs = new Vector2Int[]
             {
                 //Even
-                new Vector2Int(0,1), 
-                new Vector2Int(0,-1), 
-                new Vector2Int(1,0), 
-                new Vector2Int(-1,0),
-                new Vector2Int(-1,-1),
-                new Vector2Int(-1,1),
-                
+                new Vector2Int(0, 1),
+                new Vector2Int(0, -1),
+                new Vector2Int(1, 0),
+                new Vector2Int(-1, 0),
+                new Vector2Int(-1, -1),
+                new Vector2Int(-1, 1),
+
                 //Odd
-                new Vector2Int(0,1), 
-                new Vector2Int(0,-1), 
-                new Vector2Int(1,0), 
-                new Vector2Int(-1,0),
-                new Vector2Int(1,1),
-                new Vector2Int(1,-1),
+                new Vector2Int(0, 1),
+                new Vector2Int(0, -1),
+                new Vector2Int(1, 0),
+                new Vector2Int(-1, 0),
+                new Vector2Int(1, 1),
+                new Vector2Int(1, -1),
             };
         }
 
-        public override IGrid Generate(Vector3 basePos)
+        public override IGrid Generate(Vector3 basePos, GridDirection direction)
         {
             _grid = new List<IGridInfo>();
 
@@ -48,14 +48,31 @@ namespace Graphene.Grid
             {
                 for (int y = 0, m = _size.y; y < m; y++)
                 {
+                    Vector3 worldPos;
+                    switch (direction)
+                    {
+                        case GridDirection.XZ:
+                            worldPos = basePos + new Vector3(
+                                           w * x + w * 0.5f * (y % 2),
+                                           0,
+                                           h * y
+                                       );
+                            break;
+                        case GridDirection.XY:
+                            worldPos = basePos + new Vector3(
+                                           w * x + w * 0.5f * (y % 2),
+                                           h * y,
+                                           0
+                                       );
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+                    }
                     _grid.Add(
                         new HexGridInfo(
                             x,
                             y,
-                            basePos + new Vector3(
-                                w * x + w * 0.5f * (y % 2),
-                                0,
-                                h * y),
+                            worldPos,
                             Size)
                     );
                 }
@@ -69,12 +86,17 @@ namespace Graphene.Grid
             return _grid.Find(g => (g.worldPos - pos).magnitude < Size * .5f);
         }
 
+        public override IGridInfo GetPos(Ray ray)
+        {
+            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size);
+        }
+
         public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
         {
             var pos = mainCam.ScreenToWorldPoint(screenMouse + Vector3.forward * mainCam.nearClipPlane);
 
             var screenref = new Vector2(screenMouse.x / Screen.width, screenMouse.y / Screen.height);
-            var aspect = Screen.width / (float)Screen.height;
+            var aspect = Screen.width / (float) Screen.height;
 
             screenref = screenref * 2 - Vector2.one;
 
@@ -83,9 +105,8 @@ namespace Graphene.Grid
             fwd = Quaternion.AngleAxis(mainCam.fieldOfView * 0.5f * screenref.y * 1.2f, -mainCam.transform.right) * fwd;
 
             var ray = new Ray(pos, fwd);
-
-            var camPos = mainCam.transform.position;
-            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - camPos).magnitude)).magnitude < Size);
+            
+            return GetPos(ray);
         }
 
         public override List<IGridInfo> SelectRegion(IGridInfo gr, int size, bool removeCenter)
@@ -96,9 +117,9 @@ namespace Graphene.Grid
             {
                 for (int k = 0, o = lst.Count; k < o; k++)
                 {
-                    for (int i = 0, n = _dirs.Length/2; i < n; i++)
+                    for (int i = 0, n = _dirs.Length / 2; i < n; i++)
                     {
-                        var tmp = GetPos(lst[k].x + _dirs[i+(lst[k].y%2)*n].x, lst[k].y + _dirs[i+(lst[k].y%2)*n].y);
+                        var tmp = GetPos(lst[k].x + _dirs[i + (lst[k].y % 2) * n].x, lst[k].y + _dirs[i + (lst[k].y % 2) * n].y);
                         if (tmp != null && !tmp.isBlocked && !lst.Contains(tmp))
                         {
                             lst.Add(tmp);
@@ -201,9 +222,9 @@ namespace Graphene.Grid
             {
                 for (int k = 0, o = lst.Count; k < o; k++)
                 {
-                    for (int i = 0, n = _dirs.Length/2; i < n; i++)
+                    for (int i = 0, n = _dirs.Length / 2; i < n; i++)
                     {
-                        var tmp = GetPos(lst[k].x + _dirs[i+(lst[k].y%2)*n].x, lst[k].y + _dirs[i+(lst[k].y%2)*n].y) as HexGridInfo;
+                        var tmp = GetPos(lst[k].x + _dirs[i + (lst[k].y % 2) * n].x, lst[k].y + _dirs[i + (lst[k].y % 2) * n].y) as HexGridInfo;
                         if (tmp != null && !tmp.isBlocked && !lst.Contains(tmp))
                         {
                             lst.Add(tmp);
@@ -222,6 +243,14 @@ namespace Graphene.Grid
 
     public class HexGridInfo : FastPriorityQueueNode, IGridInfo
     {
+        private Vector3[] _sides;
+        public Vector3 worldPos { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+        public bool isBlocked { get; set; }
+        public int weight { get; set; }
+        public float size { get; set; }
+        
         public HexGridInfo(int x, int y, Vector3 worldPos, float size)
         {
             this.x = x;
@@ -239,14 +268,6 @@ namespace Graphene.Grid
                 new Vector3(worldPos.x + size * Mathf.Cos((60 * 5 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 5 - 30) * Mathf.PI / 180))
             };
         }
-
-        private Vector3[] _sides;
-        public Vector3 worldPos { get; set; }
-        public int x { get; set; }
-        public int y { get; set; }
-        public bool isBlocked { get; set; }
-        public int weight { get; set; }
-        public float size { get; set; }
 
         public void Reset()
         {
