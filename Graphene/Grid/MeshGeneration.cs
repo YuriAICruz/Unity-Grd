@@ -2,7 +2,7 @@
 using Graphene.Grid;
 using UnityEngine;
 
-namespace Packages.Grid.Graphene.Grid
+namespace Graphene.Grid
 {
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]

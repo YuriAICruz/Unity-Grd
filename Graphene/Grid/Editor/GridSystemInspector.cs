@@ -10,6 +10,8 @@ namespace Packages.Grid.Graphene.Grid
     public class GridSystemInspector : Editor
     {
         private GridSystem _self;
+        private float _div = 1;
+        private float _step = 1;
 
         private void Awake()
         {
@@ -61,6 +63,10 @@ namespace Packages.Grid.Graphene.Grid
                 _self.GridType = type;
                 ClearGrid();
             }
+
+
+            _step = EditorGUILayout.FloatField("TEMP Step", _step);
+            _div = EditorGUILayout.FloatField("TEMP Div", _div);
         }
 
         private void ClearGrid()
@@ -70,8 +76,8 @@ namespace Packages.Grid.Graphene.Grid
 
         private void DrawGrid()
         {
-            if(_self.Size.x*_self.Size.y > 1000) return;
-            
+            if (_self.Size.x * _self.Size.y > 1000) return;
+
             switch (_self.GridType)
             {
                 case GridType.Quad:
@@ -102,7 +108,7 @@ namespace Packages.Grid.Graphene.Grid
             {
                 for (int y = 0; y < _self.Size.y; y++)
                 {
-                    var sqr = _self.Grid.GetPos(x,y).GetEdges();
+                    var sqr = _self.Grid.GetPos(x, y).GetEdges();
 
                     for (int i = 0, n = sqr.Length; i < n; i++)
                     {

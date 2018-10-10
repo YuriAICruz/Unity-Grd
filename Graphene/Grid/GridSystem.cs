@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Graphene.Grid;
 using UnityEngine;
 
-namespace Packages.Grid.Graphene.Grid
+namespace Graphene.Grid
 {
     public enum GridType
     {
@@ -44,7 +44,7 @@ namespace Packages.Grid.Graphene.Grid
         {
             if (_meshGenerator == null)
                 _meshGenerator = FindObjectOfType<MeshGeneration>();
-            
+
             _meshGenerator.GenerateMesh(grids);
         }
     }
