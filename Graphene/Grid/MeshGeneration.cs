@@ -16,14 +16,9 @@ namespace Graphene.Grid
         {
             _renderer = GetComponent<Renderer>();
             _meshFilter = GetComponent<MeshFilter>();
-//
-//            if (GridSystem == null)
-//                GridSystem = FindObjectOfType<GridSystem>();
-//
-//            if (GridSystem.Grid == null)
-//                GridSystem.GenHexGrid();
-//
-//            GenerateMesh();
+
+            if (GridSystem == null)
+                GridSystem = FindObjectOfType<GridSystem>();
         }
 
         public void GenerateMesh(List<IGridInfo> cells)
@@ -38,18 +33,18 @@ namespace Graphene.Grid
             var mesh = new Mesh();
             var triangles = new List<int>();
             var vertices = new List<Vector3>();
-            var normals = new List<Vector3>();
 
             foreach (var cell in cells)
             {
                 var points = cell.GetEdges();
 
                 var center = vertices.Count;
-                normals.Add(Vector3.up);
+                
                 vertices.Add(cell.worldPos);
 
                 for (int i = 0; i < points.Length; i++)
                 {
+                    
                     if (i == 0)
                     {
                         triangles.Add(center + 1);
@@ -62,16 +57,14 @@ namespace Graphene.Grid
                         triangles.Add(center + i);
                         triangles.Add(center);
                     }
-
-                    normals.Add(Vector3.up);
-
+                    
                     vertices.Add(points[i]);
                 }
             }
 
             mesh.vertices = vertices.ToArray();
             mesh.triangles = triangles.ToArray();
-            mesh.normals = normals.ToArray();
+            mesh.RecalculateNormals();
             _meshFilter.mesh = mesh;
         }
 

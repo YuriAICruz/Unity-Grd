@@ -9,17 +9,19 @@ namespace Graphene.Grid
     public class InfiniteHexGrid : Grid
     {
         private Vector3 _basePos;
+        private readonly TrailSystem _trail;
 
-        public delegate float FloatFunc(float x);
+        public delegate float FloatFunc(Vector3 pos);
 
         public InfiniteHexGrid()
         {
         }
 
-        public InfiniteHexGrid(float radius, Vector3 basePos)
+        public InfiniteHexGrid(float radius, Vector3 basePos, TrailSystem trail)
         {
             Size = radius;
             _basePos = basePos;
+            _trail = trail;
 
             _dirs = new Vector2Int[]
             {
@@ -41,9 +43,17 @@ namespace Graphene.Grid
             };
         }
 
-        public float YGraph(float x)
+        public float YGraph(Vector3 pos)
         {
-            return Mathf.Sin((-Mathf.Pow(x, 0.5f) * 10f + Mathf.Sin(x) * 0.1f) * 0.04f) * 15 * Size;
+            var y = Mathf.Sin((-Mathf.Pow(pos.x, 0.5f) * 10f ) * 0.04f) * 15 * Size; // + Mathf.Sin(pos.x) * 0.1f
+            
+            var r = _trail.CoinMath(new Vector3(pos.x, 0, pos.z));
+
+            var offset = Math.Abs(pos.z - (r[0].z))/_trail.Step;
+
+            offset = Mathf.Pow(Mathf.Sin(offset* Mathf.PI),2) * 10;
+
+            return y + offset;
         }
 
         public override IGridInfo GetPos(int x, int y)
@@ -60,7 +70,7 @@ namespace Graphene.Grid
 
         public override IGridInfo GetPos(Ray ray)
         {
-            var p = GetCoordPos(ray.GetPoint(ray.origin.y - YGraph(ray.origin.x)));
+            var p = GetCoordPos(ray.GetPoint(ray.origin.y - YGraph(ray.origin)));
 
             return GetPos(p.x, p.y);
         }
@@ -70,9 +80,9 @@ namespace Graphene.Grid
             var w = Mathf.Sqrt(3) * Size;
             var h = 2 * Size * 0.75f;
             var y = (int) (pos.z / h);
-            
+
             return new Vector2Int(
-                (int) ((pos.x - w * 0.5f * (y % 2))/w),
+                (int) ((pos.x - w * 0.5f * (y % 2)) / w),
                 y
             );
         }
@@ -112,7 +122,7 @@ namespace Graphene.Grid
                             posX,
                             posY
                         );
-                        if (tmp != null && !tmp.isBlocked && !lst.Exists(x=> x.x == tmp.x && x.y == tmp.y))
+                        if (tmp != null && !tmp.isBlocked && !lst.Exists(x => x.x == tmp.x && x.y == tmp.y))
                         {
                             lst.Add(tmp);
                         }
@@ -148,10 +158,11 @@ namespace Graphene.Grid
             var h = 2 * size * 0.75f;
 
             var xTemp = w * x + w * 0.5f * (y % 2);
+            var zTemp = h * y;
             this.worldPos = basePos + new Vector3(
                                 xTemp,
-                                YPos(xTemp),
-                                h * y
+                                YPos(new Vector3(xTemp, 0, zTemp)),
+                                zTemp
                             );
 
             this.size = size;
@@ -161,7 +172,8 @@ namespace Graphene.Grid
             for (int i = 0; i < 6; i++)
             {
                 var xPos = worldPos.x + size * Mathf.Cos((60 * i - 30) * Mathf.PI / 180);
-                list.Add(new Vector3(xPos, YPos(xPos), worldPos.z + size * Mathf.Sin((60 * i - 30) * Mathf.PI / 180)));
+                var zPos = worldPos.z + size * Mathf.Sin((60 * i - 30) * Mathf.PI / 180);
+                list.Add(new Vector3(xPos, YPos(new Vector3(xPos, 0, zPos)), zPos));
             }
 
             _sides = list.ToArray();

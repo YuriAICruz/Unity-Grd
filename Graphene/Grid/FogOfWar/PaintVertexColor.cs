@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace VZ.Grid.FogOfWar {
+namespace Graphene.Grid.FogOfWar {
     [RequireComponent(typeof(MeshFilter))]
     public class PaintVertexColor: MonoBehaviour {
         public bool PaintNow = false;

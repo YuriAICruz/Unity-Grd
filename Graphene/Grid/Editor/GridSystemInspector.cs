@@ -4,7 +4,7 @@ using Graphene.Grid;
 using UnityEditor;
 using UnityEngine;
 
-namespace Packages.Grid.Graphene.Grid
+namespace Graphene.Grid
 {
     [CustomEditor(typeof(GridSystem))]
     public class GridSystemInspector : Editor
@@ -96,7 +96,7 @@ namespace Packages.Grid.Graphene.Grid
         {
             if (_self.Grid == null)
             {
-                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset);
+                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset, _self.GetComponent<TrailSystem>());
             }
 
             if (_self.Grid == null) return;

@@ -37,7 +37,7 @@ namespace Graphene.Grid
 
         public void GenInfHexGrid()
         {
-            Grid = new InfiniteHexGrid(Widith, Offset);
+            Grid = new InfiniteHexGrid(Widith, Offset, GetComponent<TrailSystem>());
         }
 
         public void GenMesh(List<IGridInfo> grids)

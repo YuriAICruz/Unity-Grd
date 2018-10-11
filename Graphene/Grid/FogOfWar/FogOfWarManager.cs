@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using VZ.Grid.FogOfWar;
 
 namespace Graphene.Grid.FogOfWar {
     [RequireComponent(typeof(MeshFilter))]
