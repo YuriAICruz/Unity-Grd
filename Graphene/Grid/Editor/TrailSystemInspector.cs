@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Graphene.Rhythm
 {
     [CustomEditor(typeof(TrailSystem))]
-    public class CoinSystemInspector : Editor
+    public class TrailSystemInspector : Editor
     {
         private TrailSystem _self;
 
@@ -41,7 +41,7 @@ namespace Graphene.Rhythm
             if (gr == null) return;
 
             var view = cam.transform.TransformPoint(Vector3.forward * 5);
-            var w = _self.Space;
+            var w = 5f;
             var x = ((int) (view.x - w * 30) / w) * w;
             var z = ((int) (view.z - w * 5) / w) * w;
             var y = gr.YGraph(new Vector3(x, 0, z));
@@ -49,7 +49,7 @@ namespace Graphene.Rhythm
             var color = Handles.color;
             Handles.color = Color.green;
 
-            for (int ix = 0; ix < 60; ix++)
+            for (int ix = 0; ix < 20; ix++)
             {
                 var oz = z;
                 var nx = (int) ((x + w) / w) * w;

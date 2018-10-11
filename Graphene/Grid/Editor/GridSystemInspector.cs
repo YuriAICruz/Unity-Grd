@@ -117,8 +117,6 @@ namespace Graphene.Grid
                 }
             }
             Handles.color = color;
-
-            DebugMouse();
         }
 
         private void DrawHexGrid()
