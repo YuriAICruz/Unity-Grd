@@ -45,13 +45,25 @@ namespace Graphene.Grid
 
         public float YGraph(Vector3 pos)
         {
-            var y = Mathf.Sin((-Mathf.Pow(pos.x, 0.5f) * 10f ) * 0.04f) * 15 * Size; // + Mathf.Sin(pos.x) * 0.1f
-            
+            var y = Mathf.Sin((-Mathf.Pow(pos.x, 0.5f) * 10f) * 0.04f) * 15 * Size; // + Mathf.Sin(pos.x) * 0.1f
+
             var r = _trail.CoinMath(new Vector3(pos.x, 0, pos.z));
 
-            var offset = Math.Abs(pos.z - (r[0].z))/_trail.Step;
+            var split = Mathf.Abs(r[0].z - r[1].z) > 1f;
 
-            offset = Mathf.Pow(Mathf.Sin(offset* Mathf.PI),2) * 10;
+            float offset;
+            if (split)
+            {
+                var a = Math.Abs(pos.z - (r[0].z)) / _trail.Step;
+                var b = Math.Abs(pos.z - (r[1].z)) / _trail.Step;
+                offset = b;
+            }
+            else
+            {
+                offset = Math.Abs(pos.z - (r[0].z)) / _trail.Step;
+            }
+
+            offset = Mathf.Pow(Mathf.Sin(offset * Mathf.PI), 2) * 10;
 
             return y + offset;
         }
