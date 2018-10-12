@@ -47,6 +47,8 @@ namespace Graphene.Grid
         {
             var y = Mathf.Sin((-Mathf.Pow(pos.x, 0.5f) * 10f) * 0.04f) * 15 * Size; // + Mathf.Sin(pos.x) * 0.1f
 
+            if (y < -88) return y;
+
             var r = _trail.CoinMath(new Vector3(pos.x, 0, pos.z));
 
             var split = Mathf.Abs(r[0].z - r[1].z) > 1f;
