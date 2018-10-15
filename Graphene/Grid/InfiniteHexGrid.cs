@@ -56,9 +56,13 @@ namespace Graphene.Grid
             float offset;
             if (split)
             {
-                var a = Math.Abs(pos.z - (r[0].z)) / _trail.Step;
-                var b = Math.Abs(pos.z - (r[1].z)) / _trail.Step;
-                offset = b;
+                var a = (pos.z - r[0].z) / _trail.Step;
+                var b = (pos.z - r[1].z) / _trail.Step;
+
+
+                offset = a > 0.15f ? Math.Abs(b) : Math.Abs(a);
+
+                offset = Mathf.Min(1, offset);
             }
             else
             {
