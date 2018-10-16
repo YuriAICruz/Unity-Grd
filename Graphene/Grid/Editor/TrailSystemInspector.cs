@@ -57,7 +57,7 @@ namespace Graphene.Rhythm
                 {
                     var px = new Vector3(x, gr.YGraph(new Vector3(x, 0, z)), z);
                     var nz = (int) ((z + w) / w) * w;
-                    var coinPos = _self.CoinMath(px);
+                    var coinPos = _self.TrailMath(px);
 
                     for (int i = 0; i < coinPos.Length; i++)
                     {

@@ -49,7 +49,7 @@ namespace Graphene.Grid
 
             if (y < -88) return y;
 
-            var r = _trail.CoinMath(new Vector3(pos.x, 0, pos.z));
+            var r = _trail.TrailMath(new Vector3(pos.x, 0, pos.z));
 
             var split = Mathf.Abs(r[0].z - r[1].z) > 1f;
 

@@ -19,7 +19,7 @@ namespace Graphene.Grid
         }
 
 
-        public Vector3[] CoinMath(Vector3 p)
+        public Vector3[] TrailMath(Vector3 p)
         {
             var l = Mathf.Pow(Mathf.Sin(p.z / Step), 2);
 
