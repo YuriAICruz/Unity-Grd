@@ -43,8 +43,12 @@ namespace Graphene.Grid
             };
         }
 
+        public FloatFunc SetYGraph;
+
         public float YGraph(Vector3 pos)
         {
+            return SetYGraph?.Invoke(pos) ?? 0;
+
             var y = Mathf.Sin((-Mathf.Pow(pos.x, 0.5f) * 10f) * 0.04f) * 15 * Size; // + Mathf.Sin(pos.x) * 0.1f
 
             if (y < -88) return y;
