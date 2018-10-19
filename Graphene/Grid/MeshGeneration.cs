@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Graphene.Grid;
@@ -16,7 +17,7 @@ namespace Graphene.Grid
 
         public Queue<Action> _setStack = new Queue<Action>();
         private Thread _trd;
-        
+
 
         private Mesh _mesh;
 
@@ -32,7 +33,7 @@ namespace Graphene.Grid
         private void Update()
         {
             var n = _setStack.Count;
-            
+
             for (int i = 0; i < n; i++)
             {
                 _setStack.Dequeue()();
@@ -59,12 +60,11 @@ namespace Graphene.Grid
                     var points = cell.GetEdges();
 
                     var center = vertices.Count;
-                
+
                     vertices.Add(cell.worldPos);
 
                     for (int i = 0; i < points.Length; i++)
                     {
-                    
                         if (i == 0)
                         {
                             triangles.Add(center + 1);
@@ -77,26 +77,26 @@ namespace Graphene.Grid
                             triangles.Add(center + i);
                             triangles.Add(center);
                         }
-                    
+
                         vertices.Add(points[i]);
                     }
                 }
 
                 _setStack.Enqueue(() => SetMesh(vertices, triangles));
             });
-            
+
             _trd.Start();
-            
         }
-        
+
+
         private void SetMesh(List<Vector3> vertices, List<int> triangles)
         {
             _mesh = new Mesh();
-            
+
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
             _mesh.RecalculateNormals();
-            
+
             _meshFilter.mesh = _mesh;
         }
 

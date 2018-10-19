@@ -96,7 +96,7 @@ namespace Graphene.Grid
         {
             if (_self.Grid == null)
             {
-                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset, _self.GetComponent<TrailSystem>());
+                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset);
             }
 
             if (_self.Grid == null) return;

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.IO;
 using Graphene.Grid;
 using UnityEngine;
 
@@ -42,7 +41,7 @@ namespace Graphene.Grid
                 while (Vector3.Distance(transform.position, pos.worldPos) > 0.2f)
                 {
                     transform.position += dir * Time.deltaTime * _speed;
-                    yield return new WaitForChangedResult();
+                    yield return null;
                 }
             }
             

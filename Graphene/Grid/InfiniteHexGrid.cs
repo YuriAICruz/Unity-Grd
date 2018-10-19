@@ -9,7 +9,6 @@ namespace Graphene.Grid
     public class InfiniteHexGrid : Grid
     {
         private Vector3 _basePos;
-        private readonly TrailSystem _trail;
 
         public delegate float FloatFunc(Vector3 pos);
 
@@ -17,11 +16,10 @@ namespace Graphene.Grid
         {
         }
 
-        public InfiniteHexGrid(float radius, Vector3 basePos, TrailSystem trail)
+        public InfiniteHexGrid(float radius, Vector3 basePos)
         {
             Size = radius;
             _basePos = basePos;
-            _trail = trail;
 
             _dirs = new Vector2Int[]
             {
@@ -43,39 +41,9 @@ namespace Graphene.Grid
             };
         }
 
-        public FloatFunc SetYGraph;
-
         public float YGraph(Vector3 pos)
         {
-            return SetYGraph?.Invoke(pos) ?? 0;
-
-            var y = Mathf.Sin((-Mathf.Pow(pos.x, 0.5f) * 10f) * 0.04f) * 15 * Size; // + Mathf.Sin(pos.x) * 0.1f
-
-            if (y < -88) return y;
-
-            var r = _trail.TrailMath(new Vector3(pos.x, 0, pos.z));
-
-            var split = Mathf.Abs(r[0].z - r[1].z) > 1f;
-
-            float offset;
-            if (split)
-            {
-                var a = (pos.z - r[0].z) / _trail.Step;
-                var b = (pos.z - r[1].z) / _trail.Step;
-
-
-                offset = a > 0.15f ? Math.Abs(b) : Math.Abs(a);
-
-                offset = Mathf.Min(1, offset);
-            }
-            else
-            {
-                offset = Math.Abs(pos.z - (r[0].z)) / _trail.Step;
-            }
-
-            offset = Mathf.Pow(Mathf.Sin(offset * Mathf.PI), 2) * 10;
-
-            return y + offset;
+            return Mathf.Sin(pos.x * 0.05f) * 2.6f + Mathf.Cos(pos.z * 0.1f) * 1.2f;
         }
 
         public override IGridInfo GetPos(int x, int y)
