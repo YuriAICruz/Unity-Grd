@@ -7,6 +7,7 @@ namespace Graphene.Grid
     {
         public float Div = 50;
         public float Step = 1;
+        public float MinDistance = 0;
         public GridSystem GridSystem;
         private InfiniteHexGrid _infGrid;
 
@@ -21,25 +22,19 @@ namespace Graphene.Grid
 
         public Vector3[] TrailMath(Vector3 p)
         {
-            var l = Mathf.Pow(Mathf.Sin(p.z / Step), 2);
-
-            //l = Mathf.Floor(l * (1+1/_step));
-
             var z = Mathf.Floor(p.z / Step) * Step;
             var s = Step / 2;
-            var naturalMotion = 0;//Mathf.Pow(Mathf.Sin(p.x * 0.01f), 3)* 50;
-            var division = Mathf.Clamp(Mathf.Pow(Mathf.Sin((p.x - Div * 2)/ Div), 3) * s, 0, s);
-            
+            var division = Mathf.Clamp(Mathf.Pow(Mathf.Sin((p.x - Div * 2) / Div), 3) * s, 0, s);
+
             var res = new Vector3[]
             {
-                new Vector3(p.x, 0, z + division + naturalMotion),
-                new Vector3(p.x, 0, z - division + naturalMotion),
+                new Vector3(p.x, 0, z + division - (division <= 0 ? 0 : MinDistance)),
+                new Vector3(p.x, 0, z - division + (division <= 0 ? 0 : MinDistance)),
             };
 
             //res += p;
 
             return res;
-
 
 //            var v = Mathf.Round(Mathf.Pow(Mathf.Sin(x), 2)) * Mathf.Round(Mathf.Pow(Mathf.Cos(z * 0.1f), 2));
 //            return v;
