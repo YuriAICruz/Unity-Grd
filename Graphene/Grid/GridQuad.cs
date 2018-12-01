@@ -200,6 +200,7 @@ namespace Graphene.Grid
         public bool isBlocked { get; set; }
         public int weight { get; set; }
         public float size { get; set; }
+        public GridDirection direction { get; set; }
 
         public GridInfo()
         {
@@ -248,6 +249,7 @@ namespace Graphene.Grid
         public bool isBlocked { get; set; }
         public int weight { get; set; }
         public float size { get; set; }
+        public GridDirection direction { get; set; }
 
         protected GridView _worldObject;
 

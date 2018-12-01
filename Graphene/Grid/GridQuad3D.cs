@@ -27,31 +27,41 @@ namespace Graphene.Grid
             var lyr = new LayerMask();
             lyr = ~ LayerMask.NameToLayer("IgnoreGrid") & LayerMask.NameToLayer("Grid");
 
-            var offset = new Vector3(Size / 2, Size / 2, 0);
-
-            var rayDirs = new Vector3[]
-            {
-                new Vector3(0.5f, 0.5f),
-                new Vector3(-0.5f, -0.5f),
-                new Vector3(0.5f, -0.5f),
-                new Vector3(-0.5f, 0.5f)
-            };
+            var offset = Size / 2;
 
             for (int x = 0, n = _x; x < n; x++)
             {
                 for (int y = 0, m = _y; y < m; y++)
                 {
-                    var pos = _root.TransformPoint(offset + new Vector3(x, y, 0) * Size);
-                    var block = false;
-
-                    for (int i = 0; i < rayDirs.Length; i++)
+                    Vector3 worldPos;
+                    switch (direction)
                     {
-                        var ray = new Ray(_root.TransformDirection(rayDirs[i] * Size) + pos + Vector3.up * 100, Vector3.down);
-                        block = Physics.Raycast(ray, 200, lyr);
-
-                        if (block) break;
+                        case GridDirection.XZ:
+                            worldPos = basePos + new Vector3(
+                                           x * Size + offset,
+                                           0,
+                                           y * Size + offset
+                                       );
+                            break;
+                        case GridDirection.XY:
+                            worldPos = basePos + new Vector3(
+                                           x * Size + offset,
+                                           y * Size + offset,
+                                           0
+                                       );
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
-                    _grid.Add(new WorldGrid3DInfo(x, y, pos, _root, _baseColor, block, false)); // TODO: all wrong :(
+                    _grid.Add(
+                        new WorldGrid3DInfo(
+                            x, 
+                            y, 
+                            worldPos,
+                            Size,
+                            direction
+                            )
+                        );
                 }
             }
 
@@ -62,6 +72,11 @@ namespace Graphene.Grid
         {
             var dist = Size / 2;
             return _grid.Find(g => Vector3.Distance(g.worldPos, pos) < dist);
+        }
+
+        public override IGridInfo GetPos(Ray ray)
+        {
+            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size*0.5f);
         }
 
         public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
@@ -181,37 +196,72 @@ namespace Graphene.Grid
         }
     }
 
-    public class WorldGrid3DInfo : WorldGridInfo
+    public class WorldGrid3DInfo : FastPriorityQueueNode, IGridInfo
     {
+        private Vector3[] _sides;
+        public Vector3 worldPos { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+        public bool isBlocked { get; set; }
+        public int weight { get; set; }
+        public float size { get; set; }
+        public GridDirection direction { get; set; }
+
         public WorldGrid3DInfo()
         {
         }
 
-        public WorldGrid3DInfo(int x, int y, Vector3 pos, Transform root, Color color, bool blocked, bool createObject = true)
+        public WorldGrid3DInfo(int x, int y, Vector3 worldPos, float size, GridDirection direction)
         {
             this.x = x;
             this.y = y;
-            worldPos = pos;
-            isBlocked = blocked;
+            this.worldPos = worldPos;
+            this.size = size;
+            this.direction = direction;
+            isBlocked = false;
 
-            if (!createObject) return;
-
-            var tmp = new GameObject("(" + x.ToString("00") + " ," + y.ToString("00") + ")", new Type[]
+            switch (direction)
             {
-                typeof(GridView)
-            });
+                case GridDirection.XZ:
+                    _sides = new Vector3[]
+                    {
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z + size * 0.5f),
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z - size * 0.5f),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y, worldPos.z - size * 0.5f),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y, worldPos.z + size * 0.5f)
+                    };
+                    break;
+                case GridDirection.XY:
+                    _sides = new Vector3[]
+                    {
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y + size * 0.5f, worldPos.z),
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y - size * 0.5f, worldPos.z),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y - size * 0.5f, worldPos.z),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y + size * 0.5f, worldPos.z)
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+            }
+        }
 
+        public void Reset()
+        {
+        }
 
-            tmp.transform.SetParent(root);
+        public void Draw(Color color)
+        {
+        }
 
-            tmp.transform.position = pos;
+        [Obsolete]
+        public void Draw(Color color, float size)
+        {
+            throw new System.NotImplementedException();
+        }
 
-            tmp.transform.localRotation = Quaternion.identity;
-
-            _worldObject = tmp.GetComponent<GridView>();
-            _worldObject.SetBaseColor(color);
-            _worldObject.gameObject.SetActive(!isBlocked);
-            _worldObject.CreateCollider("Grid");
+        public Vector3[] GetEdges()
+        {
+            return _sides;
         }
     }
 }

@@ -96,7 +96,7 @@ namespace Graphene.Grid
         {
             if (_self.Grid == null)
             {
-                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset);
+                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset, _self.Direction);
             }
 
             if (_self.Grid == null) return;
@@ -126,6 +126,11 @@ namespace Graphene.Grid
                 _self.Grid = new HexGrid(_self.Size.x, _self.Size.y, _self.Widith).Generate(_self.Offset, _self.Direction);
             }
 
+            DrawGridOnViewport();
+        }
+
+        private void DrawGridOnViewport()
+        {
             if (_self.Grid == null) return;
 
             var color = Handles.color;
@@ -147,40 +152,10 @@ namespace Graphene.Grid
         {
             if (_self.Grid == null)
             {
-                _self.Grid = new GridQuad3D(_self.Size.x, _self.Size.y, _self.Widith).SetRoot(_self.transform).Generate(_self.Offset, _self.Direction);
+                _self.Grid = new GridQuad3D(_self.Size.x, _self.Size.y, _self.Widith).Generate(_self.Offset, _self.Direction);
             }
 
-            if (_self.Grid == null) return;
-
-            var color = Handles.color;
-
-            Handles.color = Color.green;
-            var gr = _self.Grid.GetGrid();
-
-            if (gr == null)
-            {
-                Debug.Log(gr);
-                ClearGrid();
-                return;
-            }
-
-            foreach (var cell in gr)
-            {
-                var side = _self.Widith / 2;
-                var sqr = new Vector3[]
-                {
-                    new Vector3(cell.worldPos.x - side, cell.worldPos.y - side, cell.worldPos.z),
-                    new Vector3(cell.worldPos.x + side, cell.worldPos.y - side, cell.worldPos.z),
-                    new Vector3(cell.worldPos.x + side, cell.worldPos.y + side, cell.worldPos.z),
-                    new Vector3(cell.worldPos.x - side, cell.worldPos.y + side, cell.worldPos.z),
-                };
-
-                for (int i = 0, n = sqr.Length; i < n; i++)
-                {
-                    Handles.DrawLine(sqr[i], sqr[(i + 1) % n]);
-                }
-            }
-            Handles.color = color;
+            DrawGridOnViewport();
         }
 
         private void DebugMouse()
