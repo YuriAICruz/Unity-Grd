@@ -71,7 +71,15 @@ namespace Graphene.Grid
 //
 //                        if (block) break;
 //                    }
-                    _grid.Add(new WorldGrid3DInfo(x, y, worldPos, _root, _baseColor, false, false)); // TODO: all wrong :(
+                    _grid.Add(
+                        new WorldGrid3DInfo(
+                            x, 
+                            y, 
+                            worldPos,
+                            Size,
+                            direction
+                            )
+                        );
                 }
             }
 
@@ -82,6 +90,11 @@ namespace Graphene.Grid
         {
             var dist = Size / 2;
             return _grid.Find(g => Vector3.Distance(g.worldPos, pos) < dist);
+        }
+
+        public override IGridInfo GetPos(Ray ray)
+        {
+            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size*0.5f);
         }
 
         public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
@@ -210,37 +223,67 @@ namespace Graphene.Grid
         public bool isBlocked { get; set; }
         public int weight { get; set; }
         public float size { get; set; }
+        
+        public GridDirection direction { get; set; }
+        
 
         public WorldGrid3DInfo()
         {
         }
 
-        public WorldGrid3DInfo(int x, int y, Vector3 pos, Transform root, Color color, bool blocked, bool createObject = true)
+        public WorldGrid3DInfo(int x, int y, Vector3 worldPos, float size, GridDirection direction)
         {
             this.x = x;
             this.y = y;
-            worldPos = pos;
-            isBlocked = blocked;
+            this.worldPos = worldPos;
+            this.size = size;
+            this.direction = direction;
+            isBlocked = false;
 
-            if (!createObject) return;
-
-            var tmp = new GameObject("(" + x.ToString("00") + " ," + y.ToString("00") + ")", new Type[]
+            switch (direction)
             {
-                typeof(GridView)
-            });
-
-
-            tmp.transform.SetParent(root);
-
-            tmp.transform.position = pos;
-
-            tmp.transform.localRotation = Quaternion.identity;
-
+                case GridDirection.XZ:
+                    _sides = new Vector3[]
+                    {
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z + size * 0.5f),
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z - size * 0.5f),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y, worldPos.z - size * 0.5f),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y, worldPos.z + size * 0.5f)
+                    };
+                    break;
+                case GridDirection.XY:
+                    _sides = new Vector3[]
+                    {
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y + size * 0.5f, worldPos.z),
+                        new Vector3(worldPos.x + size * 0.5f, worldPos.y - size * 0.5f, worldPos.z),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y - size * 0.5f, worldPos.z),
+                        new Vector3(worldPos.x - size * 0.5f, worldPos.y + size * 0.5f, worldPos.z)
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+            }
+            
             _sides = new Vector3[]
             {
                 new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z + size * 0.5f),
             };
         }
+
+        public void Reset()
+        {
+        }
+
+        public void Draw(Color color)
+        {
+        }
+
+        [Obsolete]
+        public void Draw(Color color, float size)
+        {
+            throw new System.NotImplementedException();
+        }
+
 
         public void Reset()
         {

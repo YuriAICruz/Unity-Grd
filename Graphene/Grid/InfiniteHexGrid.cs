@@ -9,6 +9,7 @@ namespace Graphene.Grid
     public class InfiniteHexGrid : Grid
     {
         private Vector3 _basePos;
+        private GridDirection _direction;
 
         public delegate float FloatFunc(Vector3 pos);
 
@@ -16,10 +17,11 @@ namespace Graphene.Grid
         {
         }
 
-        public InfiniteHexGrid(float radius, Vector3 basePos)
+        public InfiniteHexGrid(float radius, Vector3 basePos, GridDirection direction)
         {
             Size = radius;
             _basePos = basePos;
+            _direction = direction;
 
             _dirs = new Vector2Int[]
             {
@@ -48,7 +50,7 @@ namespace Graphene.Grid
 
         public override IGridInfo GetPos(int x, int y)
         {
-            return new InfinityHexGridInfo(_basePos, x, y, Size, YGraph);
+            return new InfinityHexGridInfo(_basePos, x, y, Size, YGraph, _direction);
         }
 
         public override IGridInfo GetPos(Vector3 pos)
@@ -138,11 +140,13 @@ namespace Graphene.Grid
         public bool isBlocked { get; set; }
         public int weight { get; set; }
         public float size { get; set; }
+        public GridDirection direction { get; set; }
 
-        public InfinityHexGridInfo(Vector3 basePos, int x, int y, float size, InfiniteHexGrid.FloatFunc YPos)
+        public InfinityHexGridInfo(Vector3 basePos, int x, int y, float size, InfiniteHexGrid.FloatFunc YPos, GridDirection direction)
         {
             this.x = x;
             this.y = y;
+            this.direction = direction;
 
             var w = Mathf.Sqrt(3) * size;
             var h = 2 * size * 0.75f;
@@ -163,7 +167,17 @@ namespace Graphene.Grid
             {
                 var xPos = worldPos.x + size * Mathf.Cos((60 * i - 30) * Mathf.PI / 180);
                 var zPos = worldPos.z + size * Mathf.Sin((60 * i - 30) * Mathf.PI / 180);
-                list.Add(new Vector3(xPos, YPos(new Vector3(xPos, 0, zPos)), zPos));
+                switch (direction)
+                {
+                    case GridDirection.XZ:
+                        list.Add(new Vector3(xPos, YPos(new Vector3(xPos, 0, zPos)), zPos));
+                        break;
+                    case GridDirection.XY:
+                        list.Add(new Vector3(xPos, zPos, YPos(new Vector3(xPos, 0, zPos))));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+                }
             }
 
             _sides = list.ToArray();

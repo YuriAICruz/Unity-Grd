@@ -96,7 +96,7 @@ namespace Graphene.Grid
         {
             if (_self.Grid == null)
             {
-                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset);
+                _self.Grid = new InfiniteHexGrid(_self.Widith, _self.Offset, _self.Direction);
             }
 
             if (_self.Grid == null) return;
@@ -126,6 +126,11 @@ namespace Graphene.Grid
                 _self.Grid = new HexGrid(_self.Size.x, _self.Size.y, _self.Widith).Generate(_self.Offset, _self.Direction);
             }
 
+            DrawGridOnViewport();
+        }
+
+        private void DrawGridOnViewport()
+        {
             if (_self.Grid == null) return;
 
             var color = Handles.color;
@@ -149,7 +154,7 @@ namespace Graphene.Grid
             {
                 _self.Grid = new GridQuad3D(_self.Size.x, _self.Size.y, _self.Widith).SetRoot(_self.transform).Generate(_self.Offset, _self.Direction);
             }
-            
+
             Debug.Log(_self.Grid);
 
             if (_self.Grid == null) return;

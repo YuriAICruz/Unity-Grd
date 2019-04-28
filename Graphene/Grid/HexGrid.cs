@@ -73,7 +73,9 @@ namespace Graphene.Grid
                             x,
                             y,
                             worldPos,
-                            Size)
+                            Size,
+                            direction
+                        )
                     );
                 }
             }
@@ -88,7 +90,7 @@ namespace Graphene.Grid
 
         public override IGridInfo GetPos(Ray ray)
         {
-            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size);
+            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size*0.5f);
         }
 
         public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
@@ -105,7 +107,7 @@ namespace Graphene.Grid
             fwd = Quaternion.AngleAxis(mainCam.fieldOfView * 0.5f * screenref.y * 1.2f, -mainCam.transform.right) * fwd;
 
             var ray = new Ray(pos, fwd);
-            
+
             return GetPos(ray);
         }
 
@@ -250,23 +252,44 @@ namespace Graphene.Grid
         public bool isBlocked { get; set; }
         public int weight { get; set; }
         public float size { get; set; }
-        
-        public HexGridInfo(int x, int y, Vector3 worldPos, float size)
+        public GridDirection direction { get; set; }
+
+
+        public HexGridInfo(int x, int y, Vector3 worldPos, float size, GridDirection direction)
         {
             this.x = x;
             this.y = y;
             this.worldPos = worldPos;
             this.size = size;
+            this.direction = direction;
 
-            _sides = new Vector3[]
+            switch (direction)
             {
-                new Vector3(worldPos.x + size * Mathf.Cos((60 * 0 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 0 - 30) * Mathf.PI / 180)),
-                new Vector3(worldPos.x + size * Mathf.Cos((60 * 1 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 1 - 30) * Mathf.PI / 180)),
-                new Vector3(worldPos.x + size * Mathf.Cos((60 * 2 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 2 - 30) * Mathf.PI / 180)),
-                new Vector3(worldPos.x + size * Mathf.Cos((60 * 3 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 3 - 30) * Mathf.PI / 180)),
-                new Vector3(worldPos.x + size * Mathf.Cos((60 * 4 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 4 - 30) * Mathf.PI / 180)),
-                new Vector3(worldPos.x + size * Mathf.Cos((60 * 5 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 5 - 30) * Mathf.PI / 180))
-            };
+                case GridDirection.XZ:
+                    _sides = new Vector3[]
+                    {
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 0 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 0 - 30) * Mathf.PI / 180)),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 1 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 1 - 30) * Mathf.PI / 180)),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 2 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 2 - 30) * Mathf.PI / 180)),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 3 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 3 - 30) * Mathf.PI / 180)),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 4 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 4 - 30) * Mathf.PI / 180)),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 5 - 30) * Mathf.PI / 180), worldPos.y, worldPos.z + size * Mathf.Sin((60 * 5 - 30) * Mathf.PI / 180))
+                    };
+                    break;
+                case GridDirection.XY:
+                    _sides = new Vector3[]
+                    {
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 0 - 30) * Mathf.PI / 180), worldPos.y + size * Mathf.Sin((60 * 0 - 30) * Mathf.PI / 180), worldPos.z),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 1 - 30) * Mathf.PI / 180), worldPos.y + size * Mathf.Sin((60 * 1 - 30) * Mathf.PI / 180), worldPos.z),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 2 - 30) * Mathf.PI / 180), worldPos.y + size * Mathf.Sin((60 * 2 - 30) * Mathf.PI / 180), worldPos.z),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 3 - 30) * Mathf.PI / 180), worldPos.y + size * Mathf.Sin((60 * 3 - 30) * Mathf.PI / 180), worldPos.z),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 4 - 30) * Mathf.PI / 180), worldPos.y + size * Mathf.Sin((60 * 4 - 30) * Mathf.PI / 180), worldPos.z),
+                        new Vector3(worldPos.x + size * Mathf.Cos((60 * 5 - 30) * Mathf.PI / 180), worldPos.y + size * Mathf.Sin((60 * 5 - 30) * Mathf.PI / 180), worldPos.z)
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+            }
         }
 
         public void Reset()
