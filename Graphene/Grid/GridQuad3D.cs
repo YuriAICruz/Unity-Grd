@@ -29,29 +29,49 @@ namespace Graphene.Grid
 
             var offset = new Vector3(Size / 2, Size / 2, 0);
 
-            var rayDirs = new Vector3[]
-            {
-                new Vector3(0.5f, 0.5f),
-                new Vector3(-0.5f, -0.5f),
-                new Vector3(0.5f, -0.5f),
-                new Vector3(-0.5f, 0.5f)
-            };
+//            var rayDirs = new Vector3[]
+//            {
+//                new Vector3(0.5f, 0.5f),
+//                new Vector3(-0.5f, -0.5f),
+//                new Vector3(0.5f, -0.5f),
+//                new Vector3(-0.5f, 0.5f)
+//            };
 
             for (int x = 0, n = _x; x < n; x++)
             {
                 for (int y = 0, m = _y; y < m; y++)
                 {
-                    var pos = _root.TransformPoint(offset + new Vector3(x, y, 0) * Size);
-                    var block = false;
-
-                    for (int i = 0; i < rayDirs.Length; i++)
+                    Vector3 worldPos;
+                    switch (direction)
                     {
-                        var ray = new Ray(_root.TransformDirection(rayDirs[i] * Size) + pos + Vector3.up * 100, Vector3.down);
-                        block = Physics.Raycast(ray, 200, lyr);
-
-                        if (block) break;
+                        case GridDirection.XZ:
+                            worldPos = basePos + new Vector3(
+                                           x * Size*2,
+                                           0,
+                                           y * Size
+                                       );
+                            break;
+                        case GridDirection.XY:
+                            worldPos = basePos + new Vector3(
+                                           x * Size,
+                                           y * Size,
+                                           0
+                                       );
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
-                    _grid.Add(new WorldGrid3DInfo(x, y, pos, _root, _baseColor, block, false)); // TODO: all wrong :(
+                    var pos = _root.TransformPoint(offset + new Vector3(x, y, 0) * Size);
+//                    var block = false;
+//
+//                    for (int i = 0; i < rayDirs.Length; i++)
+//                    {
+//                        var ray = new Ray(_root.TransformDirection(rayDirs[i] * Size) + pos + Vector3.up * 100, Vector3.down);
+//                        block = Physics.Raycast(ray, 200, lyr);
+//
+//                        if (block) break;
+//                    }
+                    _grid.Add(new WorldGrid3DInfo(x, y, worldPos, _root, _baseColor, false, false)); // TODO: all wrong :(
                 }
             }
 
@@ -181,8 +201,16 @@ namespace Graphene.Grid
         }
     }
 
-    public class WorldGrid3DInfo : WorldGridInfo
+    public class WorldGrid3DInfo : FastPriorityQueueNode, IGridInfo
     {
+        private Vector3[] _sides;
+        public Vector3 worldPos { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+        public bool isBlocked { get; set; }
+        public int weight { get; set; }
+        public float size { get; set; }
+
         public WorldGrid3DInfo()
         {
         }
@@ -208,10 +236,29 @@ namespace Graphene.Grid
 
             tmp.transform.localRotation = Quaternion.identity;
 
-            _worldObject = tmp.GetComponent<GridView>();
-            _worldObject.SetBaseColor(color);
-            _worldObject.gameObject.SetActive(!isBlocked);
-            _worldObject.CreateCollider("Grid");
+            _sides = new Vector3[]
+            {
+                new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z + size * 0.5f),
+            };
+        }
+
+        public void Reset()
+        {
+        }
+
+        public void Draw(Color color)
+        {
+        }
+
+        [Obsolete]
+        public void Draw(Color color, float size)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Vector3[] GetEdges()
+        {
+            return _sides;
         }
     }
 }

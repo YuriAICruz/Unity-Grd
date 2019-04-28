@@ -149,6 +149,8 @@ namespace Graphene.Grid
             {
                 _self.Grid = new GridQuad3D(_self.Size.x, _self.Size.y, _self.Widith).SetRoot(_self.transform).Generate(_self.Offset, _self.Direction);
             }
+            
+            Debug.Log(_self.Grid);
 
             if (_self.Grid == null) return;
 
@@ -159,7 +161,6 @@ namespace Graphene.Grid
 
             if (gr == null)
             {
-                Debug.Log(gr);
                 ClearGrid();
                 return;
             }
@@ -167,13 +168,7 @@ namespace Graphene.Grid
             foreach (var cell in gr)
             {
                 var side = _self.Widith / 2;
-                var sqr = new Vector3[]
-                {
-                    new Vector3(cell.worldPos.x - side, cell.worldPos.y - side, cell.worldPos.z),
-                    new Vector3(cell.worldPos.x + side, cell.worldPos.y - side, cell.worldPos.z),
-                    new Vector3(cell.worldPos.x + side, cell.worldPos.y + side, cell.worldPos.z),
-                    new Vector3(cell.worldPos.x - side, cell.worldPos.y + side, cell.worldPos.z),
-                };
+                var sqr = cell.GetEdges();
 
                 for (int i = 0, n = sqr.Length; i < n; i++)
                 {
