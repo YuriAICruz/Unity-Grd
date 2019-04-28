@@ -284,21 +284,6 @@ namespace Graphene.Grid
             throw new System.NotImplementedException();
         }
 
-
-        public void Reset()
-        {
-        }
-
-        public void Draw(Color color)
-        {
-        }
-
-        [Obsolete]
-        public void Draw(Color color, float size)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public Vector3[] GetEdges()
         {
             return _sides;
