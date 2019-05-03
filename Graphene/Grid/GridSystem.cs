@@ -21,6 +21,8 @@ namespace Graphene.Grid
         [HideInInspector] public GridType GridType;
 
         [HideInInspector] public GridDirection Direction;
+        
+        [HideInInspector] public IGridInfo SelectedGrid;
 
         public IGrid Grid;
         private MeshGeneration _meshGenerator;

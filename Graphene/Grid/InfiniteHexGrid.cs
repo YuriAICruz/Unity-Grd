@@ -60,13 +60,6 @@ namespace Graphene.Grid
             return GetPos(p.x, p.y);
         }
 
-        public override IGridInfo GetPos(Ray ray)
-        {
-            var p = GetCoordPos(ray.GetPoint(ray.origin.y - YGraph(ray.origin)));
-
-            return GetPos(p.x, p.y);
-        }
-
         Vector2Int GetCoordPos(Vector3 pos)
         {
             var w = Mathf.Sqrt(3) * Size;
@@ -79,6 +72,14 @@ namespace Graphene.Grid
             );
         }
 
+
+        public override IGridInfo GetPos(Ray ray)
+        {
+            var p = GetCoordPos(ray.GetPoint(ray.origin.y - YGraph(ray.origin)));
+
+            return GetPos(p.x, p.y);
+        }
+        
         public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
         {
             var pos = mainCam.ScreenToWorldPoint(screenMouse + Vector3.forward * mainCam.nearClipPlane);

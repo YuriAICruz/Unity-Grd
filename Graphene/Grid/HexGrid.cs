@@ -90,11 +90,15 @@ namespace Graphene.Grid
 
         public override IGridInfo GetPos(Ray ray)
         {
-            return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size*0.5f);
+            return _grid.Find(grid => new Bounds(grid.worldPos, Vector3.one * Size).IntersectRay(ray));
+            //return _grid.Find(g => (g.worldPos - ray.GetPoint((g.worldPos - ray.origin).magnitude)).magnitude < Size*0.5f);
         }
 
         public override IGridInfo GetMousePos(Vector3 screenMouse, Camera mainCam)
         {
+            var scrray = mainCam.ScreenPointToRay(screenMouse);
+            return GetPos(scrray);
+
             var pos = mainCam.ScreenToWorldPoint(screenMouse + Vector3.forward * mainCam.nearClipPlane);
 
             var screenref = new Vector2(screenMouse.x / Screen.width, screenMouse.y / Screen.height);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Graphene.Grid;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Graphene.Grid
 {
@@ -10,7 +11,6 @@ namespace Graphene.Grid
     public class GridSystemInspector : Editor
     {
         private GridSystem _self;
-        private IGridInfo _selectedGrid;
         private bool _mouseDown;
 
         private void Awake()
@@ -85,6 +85,7 @@ namespace Graphene.Grid
         private void ClearGrid()
         {
             _self.Grid = null;
+            _self.SelectedGrid = null;
         }
 
         private void DrawGrid()
@@ -170,9 +171,6 @@ namespace Graphene.Grid
 
             if (_self.Grid == null) return;
 
-            var color = Handles.color;
-
-            Handles.color = Color.green;
             var gr = _self.Grid.GetGrid();
 
             if (gr == null)
@@ -183,15 +181,8 @@ namespace Graphene.Grid
 
             foreach (var cell in gr)
             {
-                var side = _self.Widith / 2;
-                var sqr = cell.GetEdges();
-
-                for (int i = 0, n = sqr.Length; i < n; i++)
-                {
-                    Handles.DrawLine(sqr[i], sqr[(i + 1) % n]);
-                }
+                DrawGrid(cell,Color.green,CompareFunction.LessEqual);
             }
-            Handles.color = color;
         }
 
         private void DebugMouse()
@@ -206,30 +197,32 @@ namespace Graphene.Grid
             mouse.y = -mouse.y + Screen.height + 60;
             var gr = _self.Grid.GetMousePos(mouse, cam);
 
-            if (_selectedGrid != null)
+            if (_self.SelectedGrid != null)
             {
-                DrawGrid(_selectedGrid, Color.blue);
+                DrawGrid(_self.SelectedGrid, Color.blue);
             }
             
             if (gr == null) return;
             
             if(Event.current.type == EventType.MouseDown && Event.current.button == 0) {
-                _selectedGrid = gr;
+                _self.SelectedGrid = gr;
                 _mouseDown  = true;
             }
             else if (_mouseDown && Event.current.type == EventType.MouseUp && Event.current.button == 0) {
                 _mouseDown  = false;
             }
             
-//                var path = _self.Grid.GetPath(_self.Grid.GetPos(_self.Size.x / 2, _self.Size.y / 2), gr);
             DrawGrid(gr, Color.red);
         }
 
-        private void DrawGrid(IGridInfo gr, Color color)
+        private void DrawGrid(IGridInfo gr, Color color, CompareFunction ztest = CompareFunction.Always)
         {
             var cl = Handles.color;
             Handles.color = color;
 
+            var z = Handles.zTest;
+
+            Handles.zTest = ztest;
             var sqr = gr.GetEdges();
 
             for (int i = 0, n = sqr.Length; i < n; i++)
@@ -238,6 +231,7 @@ namespace Graphene.Grid
             }
 
             Handles.color = cl;
+            Handles.zTest = z;
         }
     }
 }
