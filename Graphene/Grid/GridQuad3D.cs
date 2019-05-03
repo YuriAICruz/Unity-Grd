@@ -46,7 +46,7 @@ namespace Graphene.Grid
                     {
                         case GridDirection.XZ:
                             worldPos = basePos + new Vector3(
-                                           x * Size*2,
+                                           x * Size,
                                            0,
                                            y * Size
                                        );
@@ -103,14 +103,20 @@ namespace Graphene.Grid
             var lyr = LayerMask.GetMask("Grid");
             var ray = mainCam.ScreenPointToRay(screenMouse);
 
-            if (Physics.Raycast(ray, out hit, 200, lyr))
+            if (Physics.Raycast(ray, out hit, 1000, lyr))
             {
                 var pos = hit.point;
 
                 return GetPos(pos);
             }
 
-            return null;
+//            var bound = new Bounds();
+//            if (ray.)
+//            {
+//                
+//            }
+
+            return GetPos(ray);
         }
 
         private List<WorldGrid3DInfo> SelectRegionInternal(WorldGrid3DInfo gr, int size, bool removeCenter)
@@ -263,11 +269,6 @@ namespace Graphene.Grid
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
-            
-            _sides = new Vector3[]
-            {
-                new Vector3(worldPos.x + size * 0.5f, worldPos.y, worldPos.z + size * 0.5f),
-            };
         }
 
         public void Reset()

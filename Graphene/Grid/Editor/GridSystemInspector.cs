@@ -10,17 +10,34 @@ namespace Graphene.Grid
     public class GridSystemInspector : Editor
     {
         private GridSystem _self;
-        private float _div = 1;
-        private float _step = 1;
+        private IGridInfo _selectedGrid;
+        private bool _mouseDown;
 
         private void Awake()
         {
             _self = target as GridSystem;
         }
 
+        private void OnEnable()
+        {
+            EditorApplication.update += EditorUpdate;
+        }
+
+        private void OnDestroy()
+        {
+            EditorApplication.update -= EditorUpdate;
+        }
+
+        private void EditorUpdate()
+        {
+            SceneView.RepaintAll();
+        }
+
         private void OnSceneGUI()
         {
             DrawGrid();
+
+            DebugMouse();
         }
 
         public override void OnInspectorGUI()
@@ -63,10 +80,6 @@ namespace Graphene.Grid
                 _self.GridType = type;
                 ClearGrid();
             }
-
-
-            _step = EditorGUILayout.FloatField("TEMP Step", _step);
-            _div = EditorGUILayout.FloatField("TEMP Div", _div);
         }
 
         private void ClearGrid()
@@ -155,8 +168,6 @@ namespace Graphene.Grid
                 _self.Grid = new GridQuad3D(_self.Size.x, _self.Size.y, _self.Widith).SetRoot(_self.transform).Generate(_self.Offset, _self.Direction);
             }
 
-            Debug.Log(_self.Grid);
-
             if (_self.Grid == null) return;
 
             var color = Handles.color;
@@ -185,36 +196,48 @@ namespace Graphene.Grid
 
         private void DebugMouse()
         {
-            var color = Handles.color;
-
             var cam = Camera.current;
 
-            if (cam == null) return;
+            if (cam == null || Event.current == null) return;
 
-            var mouse = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
+            Vector2 mouse, test;
+            mouse = test = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
+
             mouse.y = -mouse.y + Screen.height + 60;
-//            var gr = _self.Grid.GetMousePos(mouse, cam);
-            var gr = _self.Grid.GetPos(_self.Size.x / 2, _self.Size.y / 2);
+            var gr = _self.Grid.GetMousePos(mouse, cam);
 
-            if (gr == null) return;
+            if (_selectedGrid != null)
             {
-//                var path = _self.Grid.GetPath(_self.Grid.GetPos(_self.Size.x / 2, _self.Size.y / 2), gr);
-                var path = _self.Grid.SelectRegion(gr, 2, false);
-
-                Handles.color = Color.red;
-
-                foreach (var cell in path)
-                {
-                    var sqr = cell.GetEdges();
-
-                    for (int i = 0, n = sqr.Length; i < n; i++)
-                    {
-                        Handles.DrawLine(sqr[i], sqr[(i + 1) % n]);
-                    }
-                }
-
-                Handles.color = color;
+                DrawGrid(_selectedGrid, Color.blue);
             }
+            
+            if (gr == null) return;
+            
+            if(Event.current.type == EventType.MouseDown && Event.current.button == 0) {
+                _selectedGrid = gr;
+                _mouseDown  = true;
+            }
+            else if (_mouseDown && Event.current.type == EventType.MouseUp && Event.current.button == 0) {
+                _mouseDown  = false;
+            }
+            
+//                var path = _self.Grid.GetPath(_self.Grid.GetPos(_self.Size.x / 2, _self.Size.y / 2), gr);
+            DrawGrid(gr, Color.red);
+        }
+
+        private void DrawGrid(IGridInfo gr, Color color)
+        {
+            var cl = Handles.color;
+            Handles.color = color;
+
+            var sqr = gr.GetEdges();
+
+            for (int i = 0, n = sqr.Length; i < n; i++)
+            {
+                Handles.DrawLine(sqr[i], sqr[(i + 1) % n]);
+            }
+
+            Handles.color = cl;
         }
     }
 }
